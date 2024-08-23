@@ -1,0 +1,131 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simon Says Game</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #282c34;
+            margin: 0;
+            color: white;
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+
+        #game {
+            display: grid;
+            grid-template-columns: repeat(2, 150px);
+            grid-template-rows: repeat(2, 150px);
+            gap: 10px;
+        }
+
+        .color {
+            width: 150px;
+            height: 150px;
+            border-radius: 10px;
+            cursor: pointer;
+            opacity: 0.8;
+            transition: transform 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .red { background-color: red; }
+        .green { background-color: green; }
+        .blue { background-color: blue; }
+        .yellow { background-color: yellow; }
+
+        .color.active {
+            transform: scale(1.1);
+            opacity: 1;
+            box-shadow: 0 0 20px white;
+        }
+    </style>
+</head>
+<body>
+    <div id="game">
+        <div id="red" class="color red"></div>
+        <div id="green" class="color green"></div>
+        <div id="blue" class="color blue"></div>
+        <div id="yellow" class="color yellow"></div>
+    </div>
+    <h2 id="message">Press any color to start</h2>
+
+    <script>
+        const colors = ['red', 'green', 'blue', 'yellow'];
+        let gameSequence = [];
+        let playerSequence = [];
+        let level = 0;
+
+        const startGame = () => {
+            gameSequence = [];
+            playerSequence = [];
+            level = 0;
+            document.getElementById('message').textContent = 'Watch the sequence';
+            nextSequence();
+        }
+
+        const nextSequence = () => {
+            level++;
+            playerSequence = [];
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            gameSequence.push(randomColor);
+            playSequence();
+        }
+
+        const playSequence = () => {
+            gameSequence.forEach((color, index) => {
+                setTimeout(() => {
+                    playSound(color);
+                    flashColor(color);
+                }, (index + 1) * 1000);
+            });
+
+            setTimeout(() => {
+                document.getElementById('message').textContent = `Your turn: ${level} moves`;
+            }, (gameSequence.length) * 1000 + 500);
+        }
+
+        const flashColor = (color) => {
+            const element = document.getElementById(color);
+            element.classList.add('active');
+            setTimeout(() => {
+                element.classList.remove('active');
+            }, 500);
+        }
+
+        const playSound = (color) => {
+            const audio = new Audio(`https://s3.amazonaws.com/freecodecamp/simonSound${colors.indexOf(color) + 1}.mp3`);
+            audio.play();
+        }
+
+        document.querySelectorAll('.color').forEach(colorButton => {
+            colorButton.addEventListener('click', (event) => {
+                if (gameSequence.length === 0) {
+                    startGame();
+                } else {
+                    const color = event.target.id;
+                    playSound(color);
+                    flashColor(color);
+                    playerSequence.push(color);
+                    checkSequence(playerSequence.length - 1);
+                }
+            });
+        });
+
+        const checkSequence = (index) => {
+            if (playerSequence[index] !== gameSequence[index]) {
+                document.getElementById('message').textContent = 'Game Over! Press any color to start again.';
+                gameSequence = [];
+            } else if (playerSequence.length === gameSequence.length) {
+                setTimeout(nextSequence, 1000);
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catch the Ball Game</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+        #gameCanvas {
+            border: 2px solid #000;
+            background-color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" width="400" height="600"></canvas>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let paddleX = (canvas.width - 100) / 2 ;
+        const paddleHeight = 10;
+        const paddleWidth = 100;
+        let ballX = canvas.width / 2;
+        let ballY = 30;
+        let ballRadius = 10;
+        let ballSpeedY = 20;
+        let score = 0;
+
+        function drawPaddle() {
+            ctx.fillStyle = '#0095DD';
+            ctx.fillRect(paddleX, canvas.height - paddleHeight, paddleWidth, paddleHeight);
+        }
+
+        function drawBall() {
+            ctx.beginPath();
+            ctx.arc(ballX, ballY, ballRadius, 0, Math.PI * 2);
+            ctx.fillStyle = '#0095DD';
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        function drawScore() {
+            ctx.font = '16px Arial';
+            ctx.fillStyle = '#0095DD';
+            ctx.fillText('Score: ' + score, 8, 20);
+        }
+
+        function movePaddle(event) {
+            const touchX = event.touches[0].clientX;
+            paddleX = touchX - paddleWidth / 2;
+        }
+
+        function updateGame() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawPaddle();
+            drawBall();
+            drawScore();
+
+            ballY += ballSpeedY;
+
+            if (ballY + ballRadius > canvas.height) {
+                if (ballX > paddleX && ballX < paddleX + paddleWidth) {
+                    score++;
+                    ballSpeedY += 0.5;
+                    ballY = 30;
+                    ballX = Math.random() * (canvas.width - ballRadius * 2) + ballRadius;
+                } else {
+                    alert('Game Over! Your score: ' + score);
+                    document.location.reload();
+                }
+            }
+        }
+
+        canvas.addEventListener('touchmove', movePaddle);
+
+        setInterval(updateGame, 30);
+    </script>
+</body>
+</html>

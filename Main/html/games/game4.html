@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic-Tac-Toe Game with Player Choice</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+        .container {
+            text-align: center;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-template-rows: repeat(3, 100px);
+            gap: 4px;
+            margin-top: 20px;
+        }
+        .cell {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 3rem;
+            cursor: pointer;
+            background-color: #cfd8dc; /* blue-grey-200 */
+            color: #37474f; /* blue-grey-900 */
+            transition: background-color 0.3s;
+        }
+        .cell:hover {
+            background-color: #90a4ae; /* blue-grey-300 */
+        }
+        .message {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Tic-Tac-Toe Game</h1>
+        <div>
+            <label for="playerChoice">Choose your symbol:</label>
+            <select id="playerChoice">
+                <option value="X">X (Cross)</option>
+                <option value="O">O (Zero)</option>
+            </select>
+        </div>
+        <div class="board" id="board">
+            <div class="cell" onclick="placeMark(0, 0)"></div>
+            <div class="cell" onclick="placeMark(0, 1)"></div>
+            <div class="cell" onclick="placeMark(0, 2)"></div>
+            <div class="cell" onclick="placeMark(1, 0)"></div>
+            <div class="cell" onclick="placeMark(1, 1)"></div>
+            <div class="cell" onclick="placeMark(1, 2)"></div>
+            <div class="cell" onclick="placeMark(2, 0)"></div>
+            <div class="cell" onclick="placeMark(2, 1)"></div>
+            <div class="cell" onclick="placeMark(2, 2)"></div>
+        </div>
+        <p class="message" id="message"></p>
+        <button onclick="resetGame()">Reset Game</button>
+    </div>
+
+    <script>
+        let board = [
+            ['', '', ''],
+            ['', '', ''],
+            ['', '', '']
+        ];
+
+        let currentPlayer = 'X'; // Default starting player
+        let gameOver = false;
+        let playerSymbol = 'X'; // Default player symbol
+
+        function placeMark(row, col) {
+            if (gameOver || board[row][col] !== '') return;
+
+            board[row][col] = currentPlayer;
+            document.getElementById('board').children[row * 3 + col].textContent = currentPlayer;
+
+            if (checkWin(currentPlayer)) {
+                document.getElementById('message').textContent = `Player ${currentPlayer} wins!`;
+                gameOver = true;
+            } else if (checkDraw()) {
+                document.getElementById('message').textContent = `It's a draw!`;
+                gameOver = true;
+            } else {
+                currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+                document.getElementById('message').textContent = `Player ${currentPlayer}'s turn`;
+
+                // If AI's turn and game is not over
+                if (currentPlayer !== playerSymbol && !gameOver) {
+                    setTimeout(() => {
+                        makeAIMove();
+                    }, 500); // Delay AI move for better visualization
+                }
+            }
+        }
+
+        function makeAIMove() {
+            // Simple AI logic
+            let moveMade = false;
+
+            // Try to win
+            for (let i = 0; i < 3; i++) {
+                for (let j = 0; j < 3; j++) {
+                    if (board[i][j] === '') {
+                        board[i][j] = 'O';
+                        if (checkWin('O')) {
+                            document.getElementById('board').children[i * 3 + j].textContent = 'O';
+                            document.getElementById('message').textContent = `AI (O) wins!`;
+                            gameOver = true;
+                            moveMade = true;
+                            return;
+                        }
+                        board[i][j] = '';
+                    }
+                }
+            }
+
+            // Block player from winning
+            if (!moveMade) {
+                for (let i = 0; i < 3; i++) {
+                    for (let j = 0; j < 3; j++) {
+                        if (board[i][j] === '') {
+                            board[i][j] = 'X';
+                            if (checkWin('X')) {
+                                board[i][j] = 'O';
+                                document.getElementById('board').children[i * 3 + j].textContent = 'O';
+                                board[i][j] = 'O'; // Update internal board state
+                                currentPlayer = 'X'; // Switch back to human player
+                                document.getElementById('message').textContent = `Player ${currentPlayer}'s turn`;
+                                moveMade = true;
+                                return;
+                            }
+                            board[i][j] = '';
+                        }
+                    }
+                }
+            }
+
+            // Make a random move
+            while (!moveMade) {
+                let randomRow = Math.floor(Math.random() * 3);
+                let randomCol = Math.floor(Math.random() * 3);
+                if (board[randomRow][randomCol] === '') {
+                    board[randomRow][randomCol] = 'O';
+                    document.getElementById('board').children[randomRow * 3 + randomCol].textContent = 'O';
+                    currentPlayer = 'X'; // Switch back to human player
+                    document.getElementById('message').textContent = `Player ${currentPlayer}'s turn`;
+                    moveMade = true;
+                }
+            }
+
+            if (checkDraw()) {
+                document.getElementById('message').textContent = `It's a draw!`;
+                gameOver = true;
+            }
+        }
+
+        function checkWin(player) {
+            // Check rows
+            for (let i = 0; i < 3; i++) {
+                if (board[i][0] === player && board[i][1] === player && board[i][2] === player) {
+                    return true;
+                }
+            }
+
+            // Check columns
+            for (let i = 0; i < 3; i++) {
+                if (board[0][i] === player && board[1][i] === player && board[2][i] === player) {
+                    return true;
+                }
+            }
+
+            // Check diagonals
+            if (board[0][0] === player && board[1][1] === player && board[2][2] === player) {
+                return true;
+            }
+            if (board[0][2] === player && board[1][1] === player && board[2][0] === player) {
+                return true;
+            }
+
+            return false;
+        }
+
+        function checkDraw() {
+            for (let row = 0; row < 3; row++) {
+                for (let col = 0; col < 3; col++) {
+                    if (board[row][col] === '') {
+                        return false; // If there is an empty cell, game is not draw
+                    }
+                }
+            }
+            return true; // All cells are filled, game is draw
+        }
+
+        function resetGame() {
+            board = [
+                ['', '', ''],
+                ['', '', ''],
+                ['', '', '']
+            ];
+            currentPlayer = 'X'; // Default starting player
+            gameOver = false;
+            playerSymbol = document.getElementById('playerChoice').value; // Update player symbol choice
+            document.getElementById('playerChoice').disabled = true;
+
+            document.querySelectorAll('.cell').forEach(cell => cell.textContent = '');
+            document.getElementById('message').textContent = `Player ${currentPlayer}'s turn`;
+
+            // If player chose 'O', let AI make the first move
+            if (playerSymbol === 'O') {
+                makeAIMove();
+            }
+        }
+    </script>
+</body>
+</html>

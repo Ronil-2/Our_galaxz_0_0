@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connect 4</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #282c34;
+            margin: 0;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+
+        #board {
+            display: grid;
+            grid-template-columns: repeat(7, 60px);
+            grid-template-rows: repeat(6, 60px);
+            gap: 5px;
+            background-color: #333;
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .cell {
+            width: 60px;
+            height: 60px;
+            background-color: #444;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .cell div {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            position: absolute;
+            top: -60px;
+            transition: top 0.3s ease;
+        }
+
+        .red {
+            background-color: red;
+        }
+
+        .yellow {
+            background-color: yellow;
+        }
+
+        #message {
+            margin-top: 20px;
+            font-size: 24px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Connect 4</h1>
+    <div id="board"></div>
+    <div id="message">Player 1's turn (Red)</div>
+
+    <script>
+        const rows = 6;
+        const cols = 7;
+        const board = [];
+        let currentPlayer = 'red';
+        const boardElement = document.getElementById('board');
+        const messageElement = document.getElementById('message');
+
+        function createBoard() {
+            for (let row = 0; row < rows; row++) {
+                board[row] = [];
+                for (let col = 0; col < cols; col++) {
+                    const cell = document.createElement('div');
+                    cell.classList.add('cell');
+                    cell.dataset.row = row;
+                    cell.dataset.col = col;
+                    cell.addEventListener('click', handleCellClick);
+                    boardElement.appendChild(cell);
+                    board[row][col] = null;
+                }
+            }
+        }
+
+        function handleCellClick(event) {
+            if (currentPlayer === 'yellow') return; // Bot's turn is not clickable
+            const col = parseInt(event.target.dataset.col);
+            for (let row = rows - 1; row >= 0; row--) {
+                if (!board[row][col]) {
+                    board[row][col] = 'red';
+                    const cell = document.querySelector(`.cell[data-row='${row}'][data-col='${col}']`);
+                    const disc = document.createElement('div');
+                    disc.classList.add('red');
+                    cell.appendChild(disc);
+                    setTimeout(() => {
+                        disc.style.top = '0';
+                    }, 10);
+                    if (checkWin(row, col)) {
+                        messageElement.textContent = `Player 1 wins!`;
+                        boardElement.style.pointerEvents = 'none';
+                    } else if (board.flat().every(cell => cell !== null)) {
+                        messageElement.textContent = "It's a draw!";
+                    } else {
+                        currentPlayer = 'yellow';
+                        messageElement.textContent = `Player 2's turn (Yellow)`;
+                        setTimeout(botMove, 1000);
+                    }
+                    break;
+                }
+            }
+        }
+
+        function botMove() {
+            const availableCols = [];
+            for (let col = 0; col < cols; col++) {
+                for (let row = rows - 1; row >= 0; row--) {
+                    if (!board[row][col]) {
+                        availableCols.push(col);
+                        break;
+                    }
+                }
+            }
+            if (availableCols.length === 0) return;
+            const col = availableCols[Math.floor(Math.random() * availableCols.length)];
+            for (let row = rows - 1; row >= 0; row--) {
+                if (!board[row][col]) {
+                    board[row][col] = 'yellow';
+                    const cell = document.querySelector(`.cell[data-row='${row}'][data-col='${col}']`);
+                    const disc = document.createElement('div');
+                    disc.classList.add('yellow');
+                    cell.appendChild(disc);
+                    setTimeout(() => {
+                        disc.style.top = '0';
+                    }, 10);
+                    if (checkWin(row, col)) {
+                        messageElement.textContent = `Player 2 wins!`;
+                        boardElement.style.pointerEvents = 'none';
+                    } else if (board.flat().every(cell => cell !== null)) {
+                        messageElement.textContent = "It's a draw!";
+                    } else {
+                        currentPlayer = 'red';
+                        messageElement.textContent = `Player 1's turn (Red)`;
+                    }
+                    break;
+                }
+            }
+        }
+
+        function checkWin(row, col) {
+            return checkDirection(row, col, 1, 0) || // Horizontal
+                   checkDirection(row, col, 0, 1) || // Vertical
+                   checkDirection(row, col, 1, 1) || // Diagonal /
+                   checkDirection(row, col, 1, -1);  // Diagonal \
+        }
+
+        function checkDirection(row, col, rowDir, colDir) {
+            let count = 0;
+            let r = row;
+            let c = col;
+
+            while (r >= 0 && r < rows && c >= 0 && c < cols && board[r][c] === currentPlayer) {
+                count++;
+                r += rowDir;
+                c += colDir;
+            }
+
+            r = row - rowDir;
+            c = col - colDir;
+
+            while (r >= 0 && r < rows && c >= 0 && c < cols && board[r][c] === currentPlayer) {
+                count++;
+                r -= rowDir;
+                c -= colDir;
+            }
+
+            return count >= 4;
+        }
+
+        createBoard();
+    </script>
+</body>
+</html>

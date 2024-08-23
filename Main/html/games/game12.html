@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Mario Game</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #87CEFA;
+        }
+        #gameCanvas {
+            display: block;
+            margin: auto;
+            background-color: #8B4513;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" width="800" height="400"></canvas>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        const player = {
+            x: 50,
+            y: canvas.height - 60,
+            width: 50,
+            height: 50,
+            color: 'blue',
+            dx: 0,
+            dy: 0,
+            gravity: 0.5,
+            jumpPower: -10,
+            isJumping: false
+        };
+
+        const obstacles = [
+            { x: 300, y: canvas.height - 60, width: 50, height: 50, color: 'brown', type: 'bear' },
+            { x: 500, y: canvas.height - 60, width: 50, height: 50, color: 'gray', type: 'koala' },
+            { x: 700, y: canvas.height - 60, width: 50, height: 50, color: 'green', type: 'snake' }
+        ];
+
+        const keys = {
+            right: false,
+            left: false,
+            up: false
+        };
+
+        function drawPlayer() {
+            ctx.fillStyle = player.color;
+            ctx.fillRect(player.x, player.y, player.width, player.height);
+        }
+
+        function drawObstacles() {
+            obstacles.forEach(obstacle => {
+                ctx.fillStyle = obstacle.color;
+                ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+                ctx.font = '30px Arial';
+                ctx.fillStyle = 'white';
+                ctx.fillText(obstacle.type, obstacle.x + 10, obstacle.y + 35);
+            });
+        }
+
+        function updatePlayer() {
+            if (keys.right) player.dx = 5;
+            else if (keys.left) player.dx = -5;
+            else player.dx = 0;
+
+            if (keys.up && !player.isJumping) {
+                player.dy = player.jumpPower;
+                player.isJumping = true;
+            }
+
+            player.dy += player.gravity;
+            player.x += player.dx;
+            player.y += player.dy;
+
+            if (player.y + player.height > canvas.height) {
+                player.y = canvas.height - player.height;
+                player.dy = 0;
+                player.isJumping = false;
+            }
+
+            obstacles.forEach(obstacle => {
+                if (player.y + player.height > obstacle.y && player.y < obstacle.y + obstacle.height &&
+                    player.x + player.width > obstacle.x && player.x < obstacle.x + obstacle.width) {
+                    alert('Game Over! You hit a ' + obstacle.type);
+                    player.x = 50;
+                    player.y = canvas.height - 60;
+                    player.dy = 0;
+                    player.isJumping = false;
+                }
+            });
+        }
+
+        function gameLoop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawObstacles();
+            drawPlayer();
+            updatePlayer();
+            requestAnimationFrame(gameLoop);
+        }
+
+        document.addEventListener('keydown', (event) => {
+            if (event.code === 'ArrowRight') keys.right = true;
+            if (event.code === 'ArrowLeft') keys.left = true;
+            if (event.code === 'ArrowUp') keys.up = true;
+        });
+
+        document.addEventListener('keyup', (event) => {
+            if (event.code === 'ArrowRight') keys.right = false;
+            if (event.code === 'ArrowLeft') keys.left = false;
+            if (event.code === 'ArrowUp') keys.up = false;
+        });
+
+        gameLoop();
+    </script>
+</body>
+</html>

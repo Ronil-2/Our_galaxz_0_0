@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maze Game</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        #maze {
+            display: grid;
+            grid-template-columns: repeat(10, 30px);
+            grid-template-rows: repeat(10, 30px);
+            gap: 2px;
+        }
+        .cell {
+            width: 30px;
+            height: 30px;
+            border: 1px solid #000;
+            box-sizing: border-box;
+        }
+        .wall {
+            background-color: #000;
+        }
+        .player {
+            background-color: #f00;
+            border-top-left-radius: 50%;
+            border-top-right-radius: 50%;
+        }
+        .final {
+            background-color: #0f0;
+            position: relative;
+        }
+        .final::after {
+            content: '';
+            width: 10px;
+            height: 10px;
+            background-color: #f00;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .controls {
+            display: grid;
+            grid-template-areas:
+                ". up ."
+                "left . right"
+                ". down .";
+            grid-gap: 5px;
+            margin-top: 20px;
+        }
+        .up {
+            grid-area: up;
+        }
+        .left {
+            grid-area: left;
+        }
+        .right {
+            grid-area: right;
+        }
+        .down {
+            grid-area: down;
+        }
+        .controls button {
+            width: 50px;
+            height: 50px;
+            font-size: 24px;
+        }
+        .restart {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="maze"></div>
+    <div class="controls">
+        <button class="up" onclick="move('up')">👆</button>
+        <button class="left" onclick="move('left')">👈</button>
+        <button class="right" onclick="move('right')">👉</button>
+        <button class="down" onclick="move('down')">👇</button>
+    </div>
+    <button class="restart" onclick="restart()">Restart</button>
+    <script>
+        const maze = [
+            [0, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            [0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
+            [1, 1, 1, 0, 1, 0, 1, 1, 0, 1],
+            [1, 0, 0, 0, 0, 0, 1, 0, 0, 1],
+            [1, 0, 1, 1, 1, 0, 1, 0, 1, 1],
+            [1, 0, 0, 0, 1, 0, 0, 0, 0, 1],
+            [1, 1, 1, 0, 1, 1, 1, 1, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+            [1, 0, 1, 1, 1, 1, 0, 1, 1, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 2]
+        ];
+        let playerPosition = { x: 0, y: 0 };
+        const mazeElement = document.getElementById('maze');
+
+        function drawMaze() {
+            mazeElement.innerHTML = '';
+            for (let y = 0; y < maze.length; y++) {
+                for (let x = 0; x < maze[y].length; x++) {
+                    const cell = document.createElement('div');
+                    cell.classList.add('cell');
+                    if (maze[y][x] === 1) {
+                        cell.classList.add('wall');
+                    } else if (maze[y][x] === 2) {
+                        cell.classList.add('final');
+                    } else if (playerPosition.x === x && playerPosition.y === y) {
+                        cell.classList.add('player');
+                    }
+                    mazeElement.appendChild(cell);
+                }
+            }
+        }
+
+        function move(direction) {
+            const { x, y } = playerPosition;
+            let newX = x, newY = y;
+            switch (direction) {
+                case 'up': newY--; break;
+                case 'down': newY++; break;
+                case 'left': newX--; break;
+                case 'right': newX++; break;
+            }
+            if (newX >= 0 && newY >= 0 && newX < 10 && newY < 10) {
+                if (maze[newY][newX] === 0) {
+                    playerPosition = { x: newX, y: newY };
+                } else if (maze[newY][newX] === 2) {
+                    playerPosition = { x: newX, y: newY };
+                    alert('You win!');
+                }
+            }
+            drawMaze();
+        }
+
+        function restart() {
+            playerPosition = { x: 0, y: 0 };
+            drawMaze();
+        }
+
+        drawMaze();
+    </script>
+</body>
+</html>

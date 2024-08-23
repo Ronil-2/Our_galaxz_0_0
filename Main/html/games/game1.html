@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Stone,Paper,Scissor Game</title>
+    <style>
+*{
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+}
+
+h1{
+    background-color: #881b31;
+    color: #fff;
+    height: 5rem;
+    line-height: 5rem;
+    text-align: center;
+}
+
+.choice{
+    height: 195px;
+    width: 195px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.choice:hover{
+    background: #081b31;
+    opacity: 0.9;
+}
+
+img{
+    height: 185px;
+    width: 185px;
+    object-fit: cover;
+    border-radius: 50%;
+    user-select: none;
+}
+
+.choices{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3rem;
+    margin-top: 5rem;
+}
+
+.score-board {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2rem;
+    margin-top: 3rem;
+    gap: 5rem;
+    user-select: none;
+}
+
+#user-score, #comp-score {
+    font-size: 4rem;
+}
+
+#msg-container{
+    margin-top: 5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#msg{
+    background-color: #081631;
+    color: #fff;
+    font-size: 2rem;
+    display: inline;
+    padding: 3rem;
+    border-radius: 1rem;
+    user-select: none;
+}
+
+    </style>
+</head>
+<body>
+    
+    <h1><u> Rock Paper Scissor </u></h1>
+    
+    <!-- Option -->
+    
+    <div class="choices">
+        <div class="choice" id="rock">
+            <img src="../../images/game/rock.jpg">
+        </div>
+        
+        <div class="choice" id="paper">
+            <img src="../../images/game/paper.jpg">
+        </div>
+        
+        <div class="choice" id="scissor">
+            <img src="../../images/game/scissors.jpg">
+        </div>
+        
+    </div>
+    
+    <!-- Scores -->
+    
+    <div class="score-board">
+        <div class="score">
+            <p id="user-score"> 0 </p>
+            <p> You </p>
+        </div>
+        
+        <div class="score">
+            <p id="comp-score"> 0 </p>
+            <p> Computer </p>
+        </div>
+    </div>
+    
+    
+    <!-- Msg -->
+    
+    <div id="msg-container">
+        <p id="msg">Play your move</p>
+    </div>
+    
+    <script>
+        let userScore = 0;
+let compScore = 0;
+
+const choices = document.querySelectorAll(".choice");
+const msg = document.querySelector("#msg");
+
+const userScorePara = document.querySelector("#user-score");
+const compScorePara = document.querySelector("#comp-score");
+ 
+const genCompChoice = ()=>{
+    const options = ["rock", "paper", "scissors"];
+    const randIdx= Math.floor(Math.random() * 3);
+    return options[randIdx];
+};
+
+const drawGame =() => {
+    msg.innerText = "It's a Draw!"
+    msg.style.backgroundColor= "grey";
+} 
+
+const showWinner =(userWin, userChoice, compChoice) => {
+    if(userWin) {
+        userScore++
+        userScorePara.innerText = userScore;
+        msg.innerText = `You Win! your ${userChoice} beats ${compChoice}`
+        msg.style.backgroundColor= "Green";
+    }else {
+        compScore++
+        compScorePara.innerText = compScore; 
+        msg.innerText = `You Lose! ${compChoice} beats your ${userChoice}`;
+        msg.style.backgroundColor= "Red";
+    }
+}    
+
+const playGame = (userChoice) =>{
+    const compChoice= genCompChoice();
+    
+    if(userChoice===compChoice) {
+        drawGame();
+    }else {
+        let userWin = true;
+        if(userChoice==="rock") {
+            userWin = compChoice=== "paper" ? false : true;
+        }else if(userChoice==="paper"){
+            userWin = compChoice=== "scissor" ? false : true;
+        } else{
+            userWin = compChoice=== "rock" ? false : true;
+        }
+        showWinner(userWin, userChoice, compChoice);
+    }
+};
+
+choices.forEach((choice)=>{
+    choice.addEventListener("click",()=>{
+    const userChoice = choice.getAttribute("id");
+    playGame (userChoice);
+});
+});
+
+
+    </script>
+</body>
+</html>
